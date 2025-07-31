@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Juego Simple</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        #game-canvas {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            background: #000;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .loading {
+            display: block;
+            margin: 20px 0;
+        }
+
+        .loading.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .status {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            #game-canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        
+        <div class="game-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando juego...</p>
+                <div class="status">
+                    <strong>🚀 Cargando BlobVers...</strong><br>
+                    Versión simple y confiable
+                </div>
+            </div>
+            
+            <canvas id="game-canvas" width="800" height="600" style="display: none;"></canvas>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo jugar:</h3>
+            <ul>
+                <li><strong>Movimiento:</strong> Usa las flechas para mover tu blob</li>
+                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
+                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
+                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Variables del juego
+        let canvas, ctx;
+        let player = { x: 400, y: 300, size: 20, color: '#00ff00' };
+        let enemies = [];
+        let bullets = [];
+        let score = 0;
+        let gameRunning = true;
+        let keys = {};
+
+        // Inicializar el juego
+        function initGame() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            
+            // Ocultar loading
+            document.getElementById('loading').classList.add('hidden');
+            canvas.style.display = 'block';
+            
+            // Crear enemigos iniciales
+            for (let i = 0; i < 5; i++) {
+                enemies.push({
+                    x: Math.random() * (canvas.width - 30),
+                    y: Math.random() * (canvas.height - 30),
+                    size: 15,
+                    color: '#ff0000',
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4
+                });
+            }
+            
+            // Event listeners
+            canvas.addEventListener('click', shoot);
+            document.addEventListener('keydown', (e) => keys[e.key] = true);
+            document.addEventListener('keyup', (e) => keys[e.key] = false);
+            
+            // Iniciar loop del juego
+            gameLoop();
+        }
+
+        // Loop principal del juego
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Actualizar lógica del juego
+        function update() {
+            // Movimiento del jugador
+            if (keys['ArrowLeft'] && player.x > player.size) player.x -= 5;
+            if (keys['ArrowRight'] && player.x < canvas.width - player.size) player.x += 5;
+            if (keys['ArrowUp'] && player.y > player.size) player.y -= 5;
+            if (keys['ArrowDown'] && player.y < canvas.height - player.size) player.y += 5;
+            
+            // Actualizar enemigos
+            enemies.forEach(enemy => {
+                enemy.x += enemy.vx;
+                enemy.y += enemy.vy;
+                
+                // Rebote en bordes
+                if (enemy.x <= 0 || enemy.x >= canvas.width - enemy.size) enemy.vx *= -1;
+                if (enemy.y <= 0 || enemy.y >= canvas.height - enemy.size) enemy.vy *= -1;
+            });
+            
+            // Actualizar balas
+            bullets.forEach((bullet, index) => {
+                bullet.x += bullet.vx;
+                bullet.y += bullet.vy;
+                
+                // Eliminar balas fuera de pantalla
+                if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
+                    bullets.splice(index, 1);
+                }
+            });
+            
+            // Colisiones bala-enemigo
+            bullets.forEach((bullet, bulletIndex) => {
+                enemies.forEach((enemy, enemyIndex) => {
+                    const dx = bullet.x - enemy.x;
+                    const dy = bullet.y - enemy.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < enemy.size + bullet.size) {
+                        // Eliminar bala y enemigo
+                        bullets.splice(bulletIndex, 1);
+                        enemies.splice(enemyIndex, 1);
+                        score += 10;
+                        
+                        // Crear nuevo enemigo
+                        enemies.push({
+                            x: Math.random() * (canvas.width - 30),
+                            y: Math.random() * (canvas.height - 30),
+                            size: 15,
+                            color: '#ff0000',
+                            vx: (Math.random() - 0.5) * 4,
+                            vy: (Math.random() - 0.5) * 4
+                        });
+                    }
+                });
+            });
+            
+            // Colisión jugador-enemigo
+            enemies.forEach(enemy => {
+                const dx = player.x - enemy.x;
+                const dy = player.y - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < player.size + enemy.size) {
+                    gameOver();
+                }
+            });
+        }
+
+        // Dibujar el juego
+        function draw() {
+            // Limpiar canvas
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar jugador
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Dibujar enemigos
+            enemies.forEach(enemy => {
+                ctx.fillStyle = enemy.color;
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Dibujar balas
+            bullets.forEach(bullet => {
+                ctx.fillStyle = bullet.color;
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Dibujar puntuación
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px Arial';
+            ctx.fillText('Puntuación: ' + score, 10, 30);
+        }
+
+        // Función de disparo
+        function shoot(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const angle = Math.atan2(y - player.y, x - player.x);
+            const speed = 10;
+            
+            bullets.push({
+                x: player.x,
+                y: player.y,
+                size: 5,
+                color: '#ffff00',
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed
+            });
+        }
+
+        // Función de game over
+        function gameOver() {
+            gameRunning = false;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#ff0000';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 50);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px Arial';
+            ctx.fillText('Puntuación final: ' + score, canvas.width / 2, canvas.height / 2);
+            ctx.fillText('Presiona F5 para reiniciar', canvas.width / 2, canvas.height / 2 + 50);
+        }
+
+        // Inicializar cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initGame, 1000);
+        });
+    </script>
+</body>
+</html> 
