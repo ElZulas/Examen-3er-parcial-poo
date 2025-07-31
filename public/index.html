@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Juego de Acción</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .game-frame {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .game-frame {
+                width: 100%;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        
+        <div class="game-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando juego...</p>
+            </div>
+            
+            <div class="error" id="error">
+                <h3>Error al cargar el juego</h3>
+                <p id="error-message">No se pudo cargar el juego. Por favor, recarga la página.</p>
+            </div>
+            
+            <iframe 
+                id="game-frame"
+                class="game-frame"
+                src="https://love2d.org/webplayer" 
+                width="800" 
+                height="600" 
+                frameborder="0" 
+                allowfullscreen
+                onload="hideLoading()"
+                onerror="showError('Error al cargar el reproductor de LÖVE')">
+            </iframe>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo jugar:</h3>
+            <ul>
+                <li><strong>Movimiento:</strong> Usa las flechas o WASD para mover tu blob</li>
+                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
+                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
+                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
+                <li><strong>Jefes:</strong> Cada 3 rondas aparecerá un jefe especial</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Script de configuración web -->
+    <script src="web_config.js"></script>
+    
+    <script>
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('error').classList.add('show');
+            document.getElementById('error-message').textContent = message;
+        }
+
+        // Mostrar loading al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loading').classList.add('show');
+            
+            // Ocultar loading después de 3 segundos si no se ha ocultado automáticamente
+            setTimeout(function() {
+                if (document.getElementById('loading').classList.contains('show')) {
+                    hideLoading();
+                }
+            }, 3000);
+        });
+
+        // Manejar errores del iframe
+        window.addEventListener('error', function(e) {
+            showError('Error al cargar el juego: ' + e.message);
+        });
+    </script>
+</body>
+</html> 

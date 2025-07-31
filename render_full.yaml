@@ -1,0 +1,27 @@
+services:
+  # API Server (Node.js)
+  - type: web
+    name: blobvers-api
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGODB_URI
+        sync: false  # Configurar manualmente en Render Dashboard
+      - key: JWT_SECRET
+        sync: false  # Configurar manualmente en Render Dashboard
+
+  # Web Game (Static Site)
+  - type: web
+    name: blobvers-game
+    env: static
+    buildCommand: echo "No build needed for static files"
+    startCommand: echo "Static site deployed successfully"
+    staticPublishPath: ./public
+    envVars:
+      - key: NODE_ENV
+        value: production 

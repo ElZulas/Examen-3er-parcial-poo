@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: blobvers-game
+    env: static
+    buildCommand: echo "No build needed for static files"
+    startCommand: echo "Static site deployed successfully"
+    staticPublishPath: ./public
+    envVars:
+      - key: NODE_ENV
+        value: production 
