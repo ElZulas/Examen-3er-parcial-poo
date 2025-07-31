@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - BlobVers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 BlobVers - Test Page</h1>
+        <p>Si puedes ver esta página, el deployment está funcionando.</p>
+        
+        <h2>📁 Archivos disponibles:</h2>
+        <ul style="text-align: left; list-style: none;">
+            <li>✅ <a href="phaser-game.html" class="btn">Juego Phaser.js</a></li>
+            <li>✅ <a href="love-web.html" class="btn">Juego WebAssembly</a></li>
+            <li>✅ <a href="love-player.html" class="btn">Descarga Local</a></li>
+            <li>✅ <a href="index-auto.html" class="btn">Detección Automática</a></li>
+        </ul>
+        
+        <h2>🔧 Información del deployment:</h2>
+        <p>Repositorio: https://github.com/ElZulas/Examen-3er-parcial-poo.git</p>
+        <p>Fecha: <span id="date"></span></p>
+        <p>Hora: <span id="time"></span></p>
+    </div>
+    
+    <script>
+        document.getElementById('date').textContent = new Date().toLocaleDateString();
+        document.getElementById('time').textContent = new Date().toLocaleTimeString();
+    </script>
+</body>
+</html> 
