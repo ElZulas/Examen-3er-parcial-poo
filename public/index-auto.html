@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Detección Automática</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 600px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status {
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+        
+        .redirect-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 20px 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .redirect-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        
+        <div id="checking">
+            <div class="spinner"></div>
+            <div class="status">🔍 Verificando disponibilidad del reproductor...</div>
+        </div>
+        
+        <div id="blocked" style="display: none;">
+            <div class="status">❌ El reproductor web está bloqueado</div>
+            <p>Redirigiendo a la página de descarga...</p>
+            <a href="love-player.html" class="redirect-btn">📥 Ir a descarga manual</a>
+        </div>
+        
+        <div id="available" style="display: none;">
+            <div class="status">✅ Reproductor disponible</div>
+            <p>Redirigiendo al juego...</p>
+            <a href="index.html" class="redirect-btn">🎮 Ir al juego</a>
+        </div>
+    </div>
+
+    <script>
+        // Verificar si love2d.org está bloqueado
+        function checkLove2dBlocked() {
+            return new Promise((resolve) => {
+                const testImg = new Image();
+                testImg.onload = () => resolve(false); // No está bloqueado
+                testImg.onerror = () => resolve(true);  // Está bloqueado
+                testImg.src = 'https://love2d.org/favicon.ico';
+                
+                // Timeout después de 3 segundos
+                setTimeout(() => resolve(true), 3000);
+            });
+        }
+
+        // Función principal
+        async function checkAndRedirect() {
+            try {
+                const isBlocked = await checkLove2dBlocked();
+                
+                if (isBlocked) {
+                    // Está bloqueado - mostrar mensaje y redirigir
+                    document.getElementById('checking').style.display = 'none';
+                    document.getElementById('blocked').style.display = 'block';
+                    
+                    // Redirigir automáticamente después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'love-player.html';
+                    }, 2000);
+                } else {
+                    // No está bloqueado - redirigir al juego
+                    document.getElementById('checking').style.display = 'none';
+                    document.getElementById('available').style.display = 'block';
+                    
+                    // Redirigir automáticamente después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            } catch (error) {
+                // En caso de error, asumir que está bloqueado
+                document.getElementById('checking').style.display = 'none';
+                document.getElementById('blocked').style.display = 'block';
+                
+                setTimeout(() => {
+                    window.location.href = 'love-player.html';
+                }, 2000);
+            }
+        }
+
+        // Ejecutar verificación al cargar la página
+        document.addEventListener('DOMContentLoaded', checkAndRedirect);
+    </script>
+</body>
+</html> 

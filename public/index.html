@@ -197,21 +197,50 @@
             document.getElementById('error-message').textContent = message;
         }
 
+        // Verificar si love2d.org está bloqueado
+        function checkLove2dBlocked() {
+            return new Promise((resolve) => {
+                const testImg = new Image();
+                testImg.onload = () => resolve(false); // No está bloqueado
+                testImg.onerror = () => resolve(true);  // Está bloqueado
+                testImg.src = 'https://love2d.org/favicon.ico';
+                
+                // Timeout después de 3 segundos
+                setTimeout(() => resolve(true), 3000);
+            });
+        }
+
+        // Redirigir a la página de descarga si está bloqueado
+        async function checkAndRedirect() {
+            const isBlocked = await checkLove2dBlocked();
+            if (isBlocked) {
+                window.location.href = 'love-player.html';
+            }
+        }
+
         // Mostrar loading al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('loading').classList.add('show');
             
-            // Ocultar loading después de 3 segundos si no se ha ocultado automáticamente
+            // Verificar si love2d.org está bloqueado
+            checkAndRedirect();
+            
+            // Ocultar loading después de 5 segundos si no se ha ocultado automáticamente
             setTimeout(function() {
                 if (document.getElementById('loading').classList.contains('show')) {
                     hideLoading();
                 }
-            }, 3000);
+            }, 5000);
         });
 
         // Manejar errores del iframe
         window.addEventListener('error', function(e) {
             showError('Error al cargar el juego: ' + e.message);
+        });
+
+        // Detectar errores específicos del iframe
+        document.getElementById('game-frame').addEventListener('error', function() {
+            window.location.href = 'love-player.html';
         });
     </script>
 </body>
