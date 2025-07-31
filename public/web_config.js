@@ -1,7 +1,7 @@
 // Configuración para BlobVers Web
 const WebConfig = {
     // URLs de la API
-    API_BASE_URL: 'http://localhost:3000/api', // Cambiar a tu URL de Render cuando despliegues
+    API_BASE_URL: 'https://blobvers-api.onrender.com/api', // ✅ URL correcta de Render
     
     // Configuración del juego
     GAME_WIDTH: 800,
