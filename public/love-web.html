@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Juego Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        #game-canvas {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            background: #000;
+        }
+
+        .loading {
+            display: block;
+            margin: 20px 0;
+        }
+
+        .loading.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .status {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            #game-canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        
+        <div class="game-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando juego...</p>
+                <div class="status">
+                    <strong>🚀 Cargando LÖVE WebAssembly...</strong><br>
+                    Esto puede tomar unos segundos la primera vez
+                </div>
+            </div>
+            
+            <canvas id="game-canvas" width="800" height="600" style="display: none;"></canvas>
+            
+            <div class="controls" id="controls" style="display: none;">
+                <h3>🎮 Controles:</h3>
+                <button class="control-btn" onclick="toggleFullscreen()">📺 Pantalla Completa</button>
+                <button class="control-btn" onclick="restartGame()">🔄 Reiniciar</button>
+                <button class="control-btn" onclick="togglePause()">⏸️ Pausar</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo jugar:</h3>
+            <ul>
+                <li><strong>Movimiento:</strong> Usa las flechas o WASD para mover tu blob</li>
+                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
+                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
+                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
+                <li><strong>Jefes:</strong> Cada 3 rondas aparecerá un jefe especial</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- LÖVE WebAssembly -->
+    <script src="https://cdn.jsdelivr.net/npm/love-web@latest/dist/love.js"></script>
+    
+    <script>
+        let gameInstance = null;
+        let isPaused = false;
+        let isFullscreen = false;
+
+        // Función para cargar el juego
+        async function loadGame() {
+            try {
+                const canvas = document.getElementById('game-canvas');
+                const loading = document.getElementById('loading');
+                const controls = document.getElementById('controls');
+
+                // Configurar LÖVE
+                const love = await LoveWeb.create({
+                    canvas: canvas,
+                    gamePath: 'blobvers.love',
+                    onLoad: () => {
+                        console.log('Juego cargado exitosamente');
+                        loading.classList.add('hidden');
+                        canvas.style.display = 'block';
+                        controls.style.display = 'block';
+                        
+                        // Mostrar mensaje de éxito
+                        showStatus('✅ ¡Juego cargado! Presiona cualquier tecla para empezar', 'success');
+                    },
+                    onError: (error) => {
+                        console.error('Error cargando el juego:', error);
+                        showStatus('❌ Error cargando el juego. Intenta recargar la página.', 'error');
+                    }
+                });
+
+                gameInstance = love;
+
+            } catch (error) {
+                console.error('Error inicializando LÖVE:', error);
+                showStatus('❌ Error inicializando el juego. Verifica tu conexión a internet.', 'error');
+            }
+        }
+
+        // Función para mostrar estado
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.position = 'fixed';
+            statusDiv.style.top = '20px';
+            statusDiv.style.left = '50%';
+            statusDiv.style.transform = 'translateX(-50%)';
+            statusDiv.style.zIndex = '1000';
+            statusDiv.style.padding = '10px 20px';
+            statusDiv.style.borderRadius = '10px';
+            statusDiv.style.background = type === 'error' ? 'rgba(255,0,0,0.2)' : 'rgba(0,255,0,0.2)';
+            statusDiv.style.border = type === 'error' ? '1px solid #ff6b6b' : '1px solid #4ecdc4';
+            
+            document.body.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+
+        // Función para pantalla completa
+        function toggleFullscreen() {
+            const canvas = document.getElementById('game-canvas');
+            
+            if (!isFullscreen) {
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                } else if (canvas.msRequestFullscreen) {
+                    canvas.msRequestFullscreen();
+                }
+                isFullscreen = true;
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                isFullscreen = false;
+            }
+        }
+
+        // Función para reiniciar juego
+        function restartGame() {
+            if (gameInstance) {
+                gameInstance.restart();
+                showStatus('🔄 Juego reiniciado', 'info');
+            }
+        }
+
+        // Función para pausar/reanudar
+        function togglePause() {
+            if (gameInstance) {
+                isPaused = !isPaused;
+                gameInstance.setPaused(isPaused);
+                showStatus(isPaused ? '⏸️ Juego pausado' : '▶️ Juego reanudado', 'info');
+            }
+        }
+
+        // Manejar eventos de teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                toggleFullscreen();
+            }
+        });
+
+        // Cargar el juego cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pequeño delay para mostrar la animación de carga
+            setTimeout(loadGame, 1000);
+        });
+
+        // Manejar errores de red
+        window.addEventListener('error', (e) => {
+            console.error('Error en la página:', e.error);
+            showStatus('❌ Error en la aplicación. Intenta recargar la página.', 'error');
+        });
+    </script>
+</body>
+</html> 
