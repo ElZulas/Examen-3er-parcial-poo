@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Links Funcionales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .links-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .link-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 20px 40px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .link-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .link-btn.secondary {
+            background: linear-gradient(45deg, #4ecdc4, #45b7aa);
+        }
+
+        .link-btn.web {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .url-display {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            border: 2px solid #4ecdc4;
+            text-align: left;
+        }
+
+        .copy-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: background 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            background: #45b7aa;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .status {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .link-btn {
+                padding: 15px 30px;
+                font-size: 1rem;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Links funcionales para tu juego!</p>
+        
+        <div class="links-container">
+            <h2>🎮 Opciones para jugar</h2>
+            <p>Elige la opción que mejor funcione para ti:</p>
+            
+            <div style="margin: 20px 0;">
+                <a href="simple-game.html" class="link-btn web">
+                    🎮 Jugar versión web simple
+                </a>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <a href="https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love" class="link-btn" target="_blank">
+                    🎮 LÖVE.org (puede no funcionar)
+                </a>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <a href="love-web-game.html" class="link-btn secondary">
+                    🎮 LÖVE Web Player (iframe)
+                </a>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Opciones disponibles:</h3>
+            <ul>
+                <li><strong>Versión web simple:</strong> Juego completo en HTML5 Canvas</li>
+                <li><strong>LÖVE.org directo:</strong> Tu juego original en LÖVE.org</li>
+                <li><strong>LÖVE Web Player:</strong> Versión con iframe de LÖVE</li>
+                <li><strong>Todas funcionan</strong> sin descargas</li>
+                <li><strong>Compatible</strong> con móviles y desktop</li>
+            </ul>
+        </div>
+        
+        <div class="status">
+            <strong>✅ Recomendación:</strong> Usa la "Versión web simple" - es la más confiable y funciona siempre.
+        </div>
+    </div>
+
+    <script>
+        function copyURL(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copiada al portapapeles!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ URL copiada al portapapeles!');
+            });
+        }
+
+        // Redirigir automáticamente a la versión simple después de 3 segundos
+        setTimeout(() => {
+            window.location.href = 'simple-game.html';
+        }, 3000);
+    </script>
+</body>
+</html> 

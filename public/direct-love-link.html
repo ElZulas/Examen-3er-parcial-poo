@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlobVers - Juego de Acción</title>
+    <title>BlobVers - Link Directo LÖVE.org</title>
     <style>
         * {
             margin: 0;
@@ -44,7 +44,7 @@
             opacity: 0.9;
         }
 
-        .game-container {
+        .link-container {
             background: rgba(0,0,0,0.3);
             border-radius: 15px;
             padding: 40px;
@@ -52,7 +52,7 @@
             margin-bottom: 20px;
         }
 
-        .play-btn {
+        .direct-link {
             display: inline-block;
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             color: white;
@@ -66,9 +66,36 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        .play-btn:hover {
+        .direct-link:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .url-display {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+            border: 2px solid #4ecdc4;
+        }
+
+        .copy-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #45b7aa;
         }
 
         .instructions {
@@ -102,31 +129,12 @@
             color: #4ecdc4;
         }
 
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .feature {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .feature h4 {
-            color: #4ecdc4;
-            margin-bottom: 10px;
-        }
-
         @media (max-width: 768px) {
             .title {
                 font-size: 2rem;
             }
             
-            .play-btn {
+            .direct-link {
                 padding: 20px 40px;
                 font-size: 1.2rem;
             }
@@ -136,54 +144,59 @@
 <body>
     <div class="container">
         <h1 class="title">BlobVers</h1>
-        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        <p class="subtitle">¡Link directo a LÖVE.org!</p>
         
-        <div class="game-container">
-            <h2>🎮 Juego de Acción Web</h2>
-            <p>Un juego completo que funciona directamente en tu navegador</p>
+        <div class="link-container">
+            <h2>🎮 Tu juego en LÖVE.org</h2>
+            <p>Haz clic en el botón para ir directamente a tu juego en LÖVE.org</p>
             
-            <a href="fixed-love-link.html" class="play-btn">
-                🎮 ¡JUGAR AHORA!
+            <a href="https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love" class="direct-link" target="_blank">
+                🎮 ¡JUGAR EN LÖVE.ORG!
             </a>
             
-            <div class="features">
-                <div class="feature">
-                    <h4>🚀 Sin Descargas</h4>
-                    <p>Juega directamente en el navegador</p>
-                </div>
-                <div class="feature">
-                    <h4>📱 Compatible</h4>
-                    <p>Funciona en móviles y desktop</p>
-                </div>
-                <div class="feature">
-                    <h4>🎯 Acción Real</h4>
-                    <p>Dispara, esquiva y sobrevive</p>
-                </div>
-                <div class="feature">
-                    <h4>🏆 Puntuación</h4>
-                    <p>Compite por la mejor puntuación</p>
-                </div>
+            <div class="url-display">
+                <strong>URL completa:</strong><br>
+                https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love
             </div>
+            
+            <button class="copy-btn" onclick="copyURL()">
+                📋 Copiar URL
+            </button>
         </div>
         
         <div class="instructions">
-            <h3>🎮 Cómo jugar:</h3>
+            <h3>🎮 Cómo usar:</h3>
             <ul>
-                <li><strong>Movimiento:</strong> Usa las flechas o WASD para mover tu blob</li>
-                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
-                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
-                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
-                <li><strong>Jefes:</strong> Cada 3 rondas aparecerá un jefe especial</li>
-                <li><strong>Power-ups:</strong> Recoge los items dorados para mejoras</li>
+                <li><strong>Haz clic</strong> en el botón "JUGAR EN LÖVE.ORG"</li>
+                <li><strong>Copia la URL</strong> y compártela con otros</li>
+                <li><strong>Funciona</strong> en cualquier navegador</li>
+                <li><strong>Sin descargas</strong> - Juega directamente</li>
+                <li><strong>Tu juego original</strong> con todas las características</li>
             </ul>
         </div>
     </div>
 
     <script>
-        // Redirigir automáticamente al juego después de 3 segundos
+        function copyURL() {
+            const url = "https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love";
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copiada al portapapeles!');
+            }).catch(() => {
+                // Fallback para navegadores que no soportan clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ URL copiada al portapapeles!');
+            });
+        }
+
+        // Redirigir automáticamente después de 5 segundos
         setTimeout(() => {
-            window.location.href = 'fixed-love-link.html';
-        }, 3000);
+            window.open('https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love', '_blank');
+        }, 5000);
     </script>
 </body>
 </html> 
