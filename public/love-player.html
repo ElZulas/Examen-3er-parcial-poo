@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Reproductor LÖVE</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .download-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+        
+        .error-message {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        
+        <div class="game-container">
+            <h2>🎮 Juego BlobVers</h2>
+            <p>El reproductor LÖVE web está bloqueado en tu red. Aquí tienes alternativas:</p>
+        </div>
+        
+        <div class="download-section">
+            <h3>📥 Descargar y Jugar</h3>
+            <p>Descarga el juego y ejecútalo localmente con LÖVE:</p>
+            
+            <a href="blobvers.love" download class="download-btn">
+                📦 Descargar BlobVers (.love)
+            </a>
+            
+            <br><br>
+            
+            <a href="https://love2d.org/" target="_blank" class="download-btn">
+                🎮 Descargar LÖVE
+            </a>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Instrucciones de instalación:</h3>
+            <ul>
+                <li><strong>1.</strong> Descarga LÖVE desde <a href="https://love2d.org/" target="_blank" style="color: #4ecdc4;">love2d.org</a></li>
+                <li><strong>2.</strong> Instala LÖVE en tu computadora</li>
+                <li><strong>3.</strong> Descarga el archivo blobvers.love</li>
+                <li><strong>4.</strong> Arrastra el archivo .love sobre love.exe o haz doble clic</li>
+                <li><strong>5.</strong> ¡Disfruta del juego!</li>
+            </ul>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo jugar:</h3>
+            <ul>
+                <li><strong>Movimiento:</strong> Usa las flechas o WASD para mover tu blob</li>
+                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
+                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
+                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
+                <li><strong>Jefes:</strong> Cada 3 rondas aparecerá un jefe especial</li>
+            </ul>
+        </div>
+        
+        <div class="error-message">
+            <h3>⚠️ Nota importante:</h3>
+            <p>El reproductor web de LÖVE está bloqueado en tu red. Esto es común en redes corporativas o educativas. La mejor opción es descargar el juego y ejecutarlo localmente.</p>
+        </div>
+    </div>
+</body>
+</html> 

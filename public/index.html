@@ -151,12 +151,17 @@
             <div class="error" id="error">
                 <h3>Error al cargar el juego</h3>
                 <p id="error-message">No se pudo cargar el juego. Por favor, recarga la página.</p>
+                <div style="margin-top: 20px;">
+                    <a href="love-player.html" class="download-btn" style="display: inline-block; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); color: white; padding: 10px 20px; text-decoration: none; border-radius: 15px; font-weight: bold;">
+                        📥 Descargar juego localmente
+                    </a>
+                </div>
             </div>
             
             <iframe 
                 id="game-frame"
                 class="game-frame"
-                src="https://love2d.org/webplayer" 
+                src="https://love2d.org/webplayer?game=https://blobvers-game.onrender.com/blobvers.love" 
                 width="800" 
                 height="600" 
                 frameborder="0" 
