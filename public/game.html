@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Juego Web Completo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .game-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            display: block;
+            margin: 20px 0;
+        }
+
+        .loading.hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .status {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        
+        <div class="game-container">
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Cargando juego...</p>
+                <div class="status">
+                    <strong>🚀 Cargando BlobVers Web...</strong><br>
+                    Versión completa para navegador
+                </div>
+            </div>
+            
+            <div id="game-div" style="display: none;"></div>
+            
+            <div class="controls" id="controls" style="display: none;">
+                <h3>🎮 Controles:</h3>
+                <button class="control-btn" onclick="restartGame()">🔄 Reiniciar</button>
+                <button class="control-btn" onclick="togglePause()">⏸️ Pausar</button>
+                <button class="control-btn" onclick="toggleFullscreen()">📺 Pantalla Completa</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo jugar:</h3>
+            <ul>
+                <li><strong>Movimiento:</strong> Usa las flechas o WASD para mover tu blob</li>
+                <li><strong>Disparo:</strong> Haz clic para disparar a los enemigos</li>
+                <li><strong>Objetivo:</strong> Sobrevive el mayor tiempo posible</li>
+                <li><strong>Puntuación:</strong> Elimina enemigos para ganar puntos</li>
+                <li><strong>Jefes:</strong> Cada 3 rondas aparecerá un jefe especial</li>
+                <li><strong>Power-ups:</strong> Recoge los items dorados para mejoras</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Phaser.js -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    
+    <script>
+        // Configuración del juego
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'game-div',
+            width: 800,
+            height: 600,
+            backgroundColor: '#000000',
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        // Variables del juego
+        let game;
+        let player;
+        let enemies;
+        let bullets;
+        let powerups;
+        let score = 0;
+        let scoreText;
+        let gameOver = false;
+        let cursors;
+        let lastFired = 0;
+        let fireRate = 200;
+        let isPaused = false;
+        let round = 1;
+        let enemiesKilled = 0;
+        let boss = null;
+
+        // Cargar assets
+        function preload() {
+            // Crear gráficos simples para el juego
+            this.load.image('player', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+            this.load.image('enemy', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+            this.load.image('bullet', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
+        }
+
+        // Crear el juego
+        function create() {
+            // Crear jugador
+            player = this.add.circle(400, 300, 20, 0x00ff00);
+            this.physics.add.existing(player);
+            player.body.setCollideWorldBounds(true);
+
+            // Crear grupos
+            enemies = this.physics.add.group();
+            bullets = this.physics.add.group();
+            powerups = this.physics.add.group();
+
+            // Crear enemigos iniciales
+            createEnemies(this);
+
+            // Controles
+            cursors = this.input.keyboard.createCursorKeys();
+
+            // Texto de puntuación
+            scoreText = this.add.text(16, 16, 'Puntuación: 0 | Ronda: 1', {
+                fontSize: '24px',
+                fill: '#fff'
+            });
+
+            // Colisiones
+            this.physics.add.overlap(bullets, enemies, bulletHitEnemy, null, this);
+            this.physics.add.overlap(player, enemies, gameOver, null, this);
+            this.physics.add.overlap(player, powerups, collectPowerup, null, this);
+
+            // Ocultar loading
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('game-div').style.display = 'block';
+            document.getElementById('controls').style.display = 'block';
+
+            // Mostrar mensaje de éxito
+            showStatus('✅ ¡Juego cargado! Usa las flechas para moverte y haz clic para disparar', 'success');
+        }
+
+        // Crear enemigos
+        function createEnemies(scene) {
+            const enemyCount = 5 + round * 2;
+            
+            for (let i = 0; i < enemyCount; i++) {
+                const enemy = scene.add.circle(
+                    Phaser.Math.Between(50, 750),
+                    Phaser.Math.Between(50, 550),
+                    15,
+                    0xff0000
+                );
+                enemies.add(enemy);
+                scene.physics.add.existing(enemy);
+                enemy.body.setVelocity(
+                    Phaser.Math.Between(-100, 100),
+                    Phaser.Math.Between(-100, 100)
+                );
+                enemy.body.setBounce(1, 1);
+            }
+
+            // Crear jefe cada 3 rondas
+            if (round % 3 === 0) {
+                boss = scene.add.circle(
+                    Phaser.Math.Between(100, 700),
+                    Phaser.Math.Between(100, 500),
+                    30,
+                    0xff6600
+                );
+                enemies.add(boss);
+                scene.physics.add.existing(boss);
+                boss.body.setVelocity(
+                    Phaser.Math.Between(-150, 150),
+                    Phaser.Math.Between(-150, 150)
+                );
+                boss.body.setBounce(1, 1);
+            }
+        }
+
+        // Actualizar el juego
+        function update(time) {
+            if (gameOver || isPaused) return;
+
+            // Movimiento del jugador
+            if (cursors.left.isDown) {
+                player.body.setVelocityX(-200);
+            } else if (cursors.right.isDown) {
+                player.body.setVelocityX(200);
+            } else {
+                player.body.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown) {
+                player.body.setVelocityY(-200);
+            } else if (cursors.down.isDown) {
+                player.body.setVelocityY(200);
+            } else {
+                player.body.setVelocityY(0);
+            }
+
+            // Disparo
+            if (this.input.activePointer.isDown && time > lastFired) {
+                const bullet = this.add.circle(player.x, player.y, 5, 0xffff00);
+                bullets.add(bullet);
+                this.physics.add.existing(bullet);
+
+                const angle = Phaser.Math.Angle.Between(
+                    player.x, player.y,
+                    this.input.activePointer.x, this.input.activePointer.y
+                );
+
+                bullet.body.setVelocity(
+                    Math.cos(angle) * 400,
+                    Math.sin(angle) * 400
+                );
+
+                lastFired = time + fireRate;
+            }
+
+            // Limpiar balas fuera de pantalla
+            bullets.children.each(function(bullet) {
+                if (bullet.y < 0 || bullet.y > 600 || bullet.x < 0 || bullet.x > 800) {
+                    bullet.destroy();
+                }
+            });
+
+            // Crear power-ups aleatorios
+            if (Phaser.Math.Between(1, 1000) === 1) {
+                const powerup = this.add.circle(
+                    Phaser.Math.Between(50, 750),
+                    Phaser.Math.Between(50, 550),
+                    10,
+                    0xffff00
+                );
+                powerups.add(powerup);
+                this.physics.add.existing(powerup);
+            }
+        }
+
+        // Función cuando una bala golpea un enemigo
+        function bulletHitEnemy(bullet, enemy) {
+            bullet.destroy();
+            enemy.destroy();
+            score += enemy === boss ? 50 : 10;
+            enemiesKilled++;
+            scoreText.setText('Puntuación: ' + score + ' | Ronda: ' + round);
+
+            // Verificar si todos los enemigos fueron eliminados
+            if (enemies.countActive() === 0) {
+                round++;
+                enemiesKilled = 0;
+                scoreText.setText('Puntuación: ' + score + ' | Ronda: ' + round);
+                showStatus('🎉 ¡Ronda ' + (round-1) + ' completada! Ronda ' + round + ' iniciando...', 'success');
+                
+                // Crear nuevos enemigos después de un delay
+                setTimeout(() => {
+                    createEnemies(this);
+                }, 2000);
+            }
+        }
+
+        // Función para recolectar power-ups
+        function collectPowerup(player, powerup) {
+            powerup.destroy();
+            score += 20;
+            fireRate = Math.max(50, fireRate - 20); // Mejorar velocidad de disparo
+            showStatus('⚡ Power-up recolectado! Velocidad de disparo mejorada', 'success');
+        }
+
+        // Función de game over
+        function gameOver() {
+            gameOver = true;
+            this.physics.pause();
+            this.add.text(400, 250, 'GAME OVER', {
+                fontSize: '64px',
+                fill: '#ff0000'
+            }).setOrigin(0.5);
+            this.add.text(400, 320, 'Puntuación final: ' + score, {
+                fontSize: '32px',
+                fill: '#fff'
+            }).setOrigin(0.5);
+            this.add.text(400, 360, 'Rondas completadas: ' + (round-1), {
+                fontSize: '24px',
+                fill: '#fff'
+            }).setOrigin(0.5);
+            this.add.text(400, 400, 'Presiona F5 para reiniciar', {
+                fontSize: '24px',
+                fill: '#fff'
+            }).setOrigin(0.5);
+        }
+
+        // Función para reiniciar juego
+        function restartGame() {
+            location.reload();
+        }
+
+        // Función para pausar/reanudar
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                game.scene.pause();
+                showStatus('⏸️ Juego pausado', 'info');
+            } else {
+                game.scene.resume();
+                showStatus('▶️ Juego reanudado', 'info');
+            }
+        }
+
+        // Función para pantalla completa
+        function toggleFullscreen() {
+            const gameDiv = document.getElementById('game-div');
+            if (!document.fullscreenElement) {
+                gameDiv.requestFullscreen().catch(err => {
+                    console.log('Error al entrar en pantalla completa:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Función para mostrar estado
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.position = 'fixed';
+            statusDiv.style.top = '20px';
+            statusDiv.style.left = '50%';
+            statusDiv.style.transform = 'translateX(-50%)';
+            statusDiv.style.zIndex = '1000';
+            statusDiv.style.padding = '10px 20px';
+            statusDiv.style.borderRadius = '10px';
+            statusDiv.style.background = type === 'error' ? 'rgba(255,0,0,0.2)' : 'rgba(0,255,0,0.2)';
+            statusDiv.style.border = type === 'error' ? '1px solid #ff6b6b' : '1px solid #4ecdc4';
+            
+            document.body.appendChild(statusDiv);
+            
+            setTimeout(() => {
+                statusDiv.remove();
+            }, 3000);
+        }
+
+        // Inicializar el juego
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                game = new Phaser.Game(config);
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 
