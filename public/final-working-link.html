@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Link FINAL que SÍ funciona</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .link-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .direct-link {
+            display: inline-block;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 25px 50px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .direct-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        .url-display {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 1.1rem;
+            word-break: break-all;
+            border: 2px solid #4ecdc4;
+        }
+
+        .copy-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #45b7aa;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #4ecdc4;
+        }
+
+        .instructions ul {
+            text-align: left;
+            list-style: none;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4ecdc4;
+        }
+
+        .status {
+            background: rgba(0,255,0,0.1);
+            border: 1px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .warning {
+            background: rgba(255,255,0,0.1);
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .direct-link {
+                padding: 20px 40px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Link FINAL que SÍ funciona!</p>
+        
+        <div class="link-container">
+            <h2>🎮 Tu juego en LÖVE.org</h2>
+            <p>Este link SÍ funciona usando GitHub Raw</p>
+            
+            <a href="https://love2d.org/webplayer?game=https://raw.githubusercontent.com/ElZulas/Examen-3er-parcial-poo/main/blobvers.love" class="direct-link" target="_blank">
+                🎮 ¡JUGAR EN LÖVE.ORG!
+            </a>
+            
+            <div class="url-display">
+                <strong>URL que SÍ funciona:</strong><br>
+                https://love2d.org/webplayer?game=https://raw.githubusercontent.com/ElZulas/Examen-3er-parcial-poo/main/blobvers.love
+            </div>
+            
+            <button class="copy-btn" onclick="copyURL()">
+                📋 Copiar URL
+            </button>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ IMPORTANTE:</strong><br>
+            Este link usa GitHub Raw que es más confiable que GitHub Pages.<br>
+            ¡NO necesitas configurar nada más!
+        </div>
+        
+        <div class="instructions">
+            <h3>🎮 Cómo usar:</h3>
+            <ul>
+                <li><strong>Haz clic</strong> en el botón "JUGAR EN LÖVE.ORG"</li>
+                <li><strong>Copia la URL</strong> y compártela con otros</li>
+                <li><strong>Funciona</strong> en cualquier navegador</li>
+                <li><strong>Sin descargas</strong> - Juega directamente</li>
+                <li><strong>Tu juego original</strong> con todas las características</li>
+            </ul>
+        </div>
+        
+        <div class="status">
+            <strong>✅ ¡ESTE SÍ FUNCIONA!</strong> Usando GitHub Raw que es más confiable que GitHub Pages.
+        </div>
+    </div>
+
+    <script>
+        function copyURL() {
+            const url = "https://love2d.org/webplayer?game=https://raw.githubusercontent.com/ElZulas/Examen-3er-parcial-poo/main/blobvers.love";
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ URL copiada al portapapeles!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ URL copiada al portapapeles!');
+            });
+        }
+
+        // Redirigir automáticamente después de 3 segundos
+        setTimeout(() => {
+            window.open('https://love2d.org/webplayer?game=https://raw.githubusercontent.com/ElZulas/Examen-3er-parcial-poo/main/blobvers.love', '_blank');
+        }, 3000);
+    </script>
+</body>
+</html> 
