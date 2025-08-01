@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlobVers - Juego Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .game-container {
+            text-align: center;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        #gameCanvas {
+            border: 3px solid #4ecdc4;
+            border-radius: 10px;
+            background: #000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .controls {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .score {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #4ecdc4;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .restart-btn {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">BlobVers</h1>
+        <p class="subtitle">¡Sobrevive y domina el mundo de los blobs!</p>
+        
+        <div class="score" id="score">Puntuación: 0</div>
+        <div class="score" id="lives">Vidas: 3</div>
+        
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <strong>Controles:</strong> Flechas para mover | Clic para disparar
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>¡Game Over!</h2>
+        <p id="finalScore">Puntuación final: 0</p>
+        <button class="restart-btn" onclick="restartGame()">Jugar de nuevo</button>
+    </div>
+
+    <script>
+        // Configuración del juego
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const livesElement = document.getElementById('lives');
+        const gameOverElement = document.getElementById('gameOver');
+        const finalScoreElement = document.getElementById('finalScore');
+
+        // Variables del juego
+        let score = 0;
+        let lives = 3;
+        let gameRunning = true;
+        let keys = {};
+        let mouseX = 0;
+        let mouseY = 0;
+
+        // Jugador
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 50,
+            width: 30,
+            height: 30,
+            speed: 5,
+            color: '#4ecdc4'
+        };
+
+        // Arrays para objetos del juego
+        let bullets = [];
+        let enemies = [];
+        let powerUps = [];
+        let particles = [];
+
+        // Configuración de enemigos
+        let enemySpawnTimer = 0;
+        const enemySpawnRate = 60; // Frames entre spawns
+        let wave = 1;
+        let bossSpawnTimer = 0;
+
+        // Clase para balas
+        class Bullet {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 4;
+                this.height = 10;
+                this.speed = 8;
+                this.color = '#ff6b6b';
+            }
+
+            update() {
+                this.y -= this.speed;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        // Clase para enemigos
+        class Enemy {
+            constructor(x, y, type = 'normal') {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.width = type === 'boss' ? 60 : 30;
+                this.height = type === 'boss' ? 60 : 30;
+                this.speed = type === 'boss' ? 1 : 2;
+                this.health = type === 'boss' ? 10 : 1;
+                this.color = type === 'boss' ? '#ff4757' : '#ffa502';
+                this.points = type === 'boss' ? 50 : 10;
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                
+                // Barra de vida para jefes
+                if (this.type === 'boss') {
+                    ctx.fillStyle = '#2ed573';
+                    ctx.fillRect(this.x, this.y - 10, (this.width * this.health) / 10, 5);
+                }
+            }
+        }
+
+        // Clase para power-ups
+        class PowerUp {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.width = 20;
+                this.height = 20;
+                this.speed = 2;
+                this.color = '#ffd700';
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        }
+
+        // Clase para partículas
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.life = 30;
+                this.color = color;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.life / 30;
+                ctx.fillRect(this.x, this.y, 3, 3);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        canvas.addEventListener('click', () => {
+            if (gameRunning) {
+                bullets.push(new Bullet(player.x + player.width / 2 - 2, player.y));
+            }
+        });
+
+        // Funciones del juego
+        function updatePlayer() {
+            if (keys['ArrowLeft'] || keys['a']) {
+                player.x -= player.speed;
+            }
+            if (keys['ArrowRight'] || keys['d']) {
+                player.x += player.speed;
+            }
+            if (keys['ArrowUp'] || keys['w']) {
+                player.y -= player.speed;
+            }
+            if (keys['ArrowDown'] || keys['s']) {
+                player.y += player.speed;
+            }
+
+            // Mantener jugador en pantalla
+            player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+        }
+
+        function updateBullets() {
+            bullets = bullets.filter(bullet => {
+                bullet.update();
+                return bullet.y > 0;
+            });
+        }
+
+        function updateEnemies() {
+            // Spawn de enemigos
+            enemySpawnTimer++;
+            if (enemySpawnTimer >= enemySpawnRate) {
+                const x = Math.random() * (canvas.width - 30);
+                enemies.push(new Enemy(x, -30));
+                enemySpawnTimer = 0;
+            }
+
+            // Spawn de jefes
+            bossSpawnTimer++;
+            if (bossSpawnTimer >= 1800) { // Cada 30 segundos
+                const x = Math.random() * (canvas.width - 60);
+                enemies.push(new Enemy(x, -60, 'boss'));
+                bossSpawnTimer = 0;
+            }
+
+            // Spawn de power-ups
+            if (Math.random() < 0.005) {
+                const x = Math.random() * (canvas.width - 20);
+                powerUps.push(new PowerUp(x, -20));
+            }
+
+            enemies = enemies.filter(enemy => {
+                enemy.update();
+                return enemy.y < canvas.height;
+            });
+
+            powerUps = powerUps.filter(powerUp => {
+                powerUp.update();
+                return powerUp.y < canvas.height;
+            });
+        }
+
+        function checkCollisions() {
+            // Balas vs Enemigos
+            bullets.forEach((bullet, bulletIndex) => {
+                enemies.forEach((enemy, enemyIndex) => {
+                    if (bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y) {
+                        
+                        // Crear partículas
+                        for (let i = 0; i < 10; i++) {
+                            particles.push(new Particle(enemy.x + enemy.width/2, enemy.y + enemy.height/2, enemy.color));
+                        }
+
+                        // Eliminar bala y enemigo
+                        bullets.splice(bulletIndex, 1);
+                        enemies.splice(enemyIndex, 1);
+                        
+                        // Añadir puntos
+                        score += enemy.points;
+                        scoreElement.textContent = `Puntuación: ${score}`;
+                    }
+                });
+            });
+
+            // Jugador vs Enemigos
+            enemies.forEach((enemy, index) => {
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    
+                    enemies.splice(index, 1);
+                    lives--;
+                    livesElement.textContent = `Vidas: ${lives}`;
+                    
+                    // Crear partículas
+                    for (let i = 0; i < 15; i++) {
+                        particles.push(new Particle(player.x + player.width/2, player.y + player.height/2, '#ff6b6b'));
+                    }
+
+                    if (lives <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+
+            // Jugador vs Power-ups
+            powerUps.forEach((powerUp, index) => {
+                if (player.x < powerUp.x + powerUp.width &&
+                    player.x + player.width > powerUp.x &&
+                    player.y < powerUp.y + powerUp.height &&
+                    player.y + player.height > powerUp.y) {
+                    
+                    powerUps.splice(index, 1);
+                    score += 25;
+                    scoreElement.textContent = `Puntuación: ${score}`;
+                    
+                    // Efecto visual
+                    player.color = '#ffd700';
+                    setTimeout(() => {
+                        player.color = '#4ecdc4';
+                    }, 500);
+                }
+            });
+        }
+
+        function updateParticles() {
+            particles = particles.filter(particle => {
+                particle.update();
+                return particle.life > 0;
+            });
+        }
+
+        function draw() {
+            // Limpiar canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar jugador
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Dibujar balas
+            bullets.forEach(bullet => bullet.draw());
+
+            // Dibujar enemigos
+            enemies.forEach(enemy => enemy.draw());
+
+            // Dibujar power-ups
+            powerUps.forEach(powerUp => powerUp.draw());
+
+            // Dibujar partículas
+            particles.forEach(particle => particle.draw());
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            finalScoreElement.textContent = `Puntuación final: ${score}`;
+            gameOverElement.style.display = 'block';
+        }
+
+        function restartGame() {
+            score = 0;
+            lives = 3;
+            gameRunning = true;
+            bullets = [];
+            enemies = [];
+            powerUps = [];
+            particles = [];
+            enemySpawnTimer = 0;
+            bossSpawnTimer = 0;
+            wave = 1;
+            
+            player.x = canvas.width / 2;
+            player.y = canvas.height - 50;
+            player.color = '#4ecdc4';
+            
+            scoreElement.textContent = `Puntuación: ${score}`;
+            livesElement.textContent = `Vidas: ${lives}`;
+            gameOverElement.style.display = 'none';
+        }
+
+        // Loop principal del juego
+        function gameLoop() {
+            if (gameRunning) {
+                updatePlayer();
+                updateBullets();
+                updateEnemies();
+                checkCollisions();
+                updateParticles();
+            }
+            
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Iniciar el juego
+        gameLoop();
+    </script>
+</body>
+</html> 
